@@ -10,7 +10,7 @@ QQBotVersion = "QQBot-v1.7.3"
 
 import json, os, logging, pickle, sys, time, random, platform, subprocess
 import requests, Queue, threading
-
+import urllib2,re
 # 'utf8', 'UTF8', 'utf-8', 'utf_8', None are all represent the same encoding
 def codingEqual(coding1, coding2):
     return coding1 is None or coding2 is None or \
@@ -313,7 +313,14 @@ class QQBot:
             else:
                 QLogger.info('来自 %s%d(buddy%d) 的消息: <%s>' % pollResult)
         return pollResult
-    
+    def getip(self):
+        url = "http://checkip.dyndns.com"
+        html = urllib2.urlopen(url).read()
+        reip = re.compile(r'(?<![\.\d])(?:\d{1,3}\.){3}\d{1,3}(?![\.\d])')
+        ip = reip.findall(html)
+        ip = ('').join(ip).encode('utf8')
+        return ip
+
     def send(self, msgType, to_uin, msg):
         while msg:
             front, msg = utf8Partition(msg, 600)
@@ -462,6 +469,9 @@ class QQBot:
         elif message == '-refetch':
             self.refetch()
             reply = '重新获取 好友/群/讨论组 成功'
+        elif message == '-ip':
+            reply = self.getip()
+
         elif message == '-stop':
             reply = 'QQBot已关闭'
             self.stopped = True
