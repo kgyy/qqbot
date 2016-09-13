@@ -10,7 +10,7 @@ QQBotVersion = "QQBot-v1.7.3"
 
 import json, os, logging, pickle, sys, time, random, platform, subprocess
 import requests, Queue, threading
-import urllib2,re
+import urllib,urllib2,re
 # 'utf8', 'UTF8', 'utf-8', 'utf_8', None are all represent the same encoding
 def codingEqual(coding1, coding2):
     return coding1 is None or coding2 is None or \
@@ -321,6 +321,19 @@ class QQBot:
         ip = ('').join(ip).encode('utf8')
         return ip
 
+    def tulingrobot(self,message):
+        
+        url = 'http://www.tuling123.com/openapi/api'
+        tulingkey ='02491bb3e3484ddbbf2f1dbbc16addc0'
+        values = {'key':tulingkey,'info':message}
+
+        jsondata = urllib.urlencode(values)
+        req = urllib2.Request(url,jsondata)
+        response = urllib2.urlopen(req).read()
+        tuling_text = json.loads(response).get('text').replace('<br>','\n')
+
+        return tuling_text
+
     def send(self, msgType, to_uin, msg):
         while msg:
             front, msg = utf8Partition(msg, 600)
@@ -475,6 +488,8 @@ class QQBot:
         elif message == '-stop':
             reply = 'QQBot已关闭'
             self.stopped = True
+        elif msgType == 'buddy':
+            reply = self.tulingrobot(message)
         self.send(msgType, from_uin, reply)
 
 # $filename must be an utf8 string
